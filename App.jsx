@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -17,29 +18,26 @@ import {
 } from 'react-native';
 
 import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
+import LottieView from 'lottie-react-native';
+import {Provider as PaperProvider} from 'react-native-paper';
+import PANDA from './assests/signuppanda.json';
+import LoginScreen from './screens/auth/login.screen';
+import SignupScreen from './screens/auth/signup.screen';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    height: '100%',
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Text>Hii</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <PaperProvider>
+      <SafeAreaView style={backgroundStyle}>
+        <SignupScreen />
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 
