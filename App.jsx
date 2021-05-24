@@ -6,36 +6,62 @@
  * @format
  * @flow strict-local
  */
-
+import 'react-native-gesture-handler';
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
-import LottieView from 'lottie-react-native';
+import {SafeAreaView} from 'react-native';
 import {Provider as PaperProvider} from 'react-native-paper';
-import PANDA from './assests/signuppanda.json';
-import LoginScreen from './screens/auth/login.screen';
-import SignupScreen from './screens/auth/signup.screen';
+import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {
+  HomeScreen,
+  LoginScreen,
+  SettingScreen,
+  SignupScreen,
+  SplashScreen,
+} from './screens';
+
+const Stack = createStackNavigator();
+
+const AuthStack = () => (
+  <Stack.Navigator initialRouteName='Login'>
+    <Stack.Screen
+      options={{headerShown: false}}
+      name='Login'
+      component={LoginScreen}
+    />
+    <Stack.Screen
+      options={{headerShown: false}}
+      name='Signup'
+      component={SignupScreen}
+    />
+  </Stack.Navigator>
+);
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: 'white',
     height: '100%',
   };
 
   return (
     <PaperProvider>
       <SafeAreaView style={backgroundStyle}>
-        <SignupScreen />
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName='Splash'>
+            <Stack.Screen
+              options={{headerShown: false}}
+              name='Splash'
+              component={SplashScreen}
+            />
+            <Stack.Screen
+              options={{headerShown: false}}
+              name='Auth'
+              component={AuthStack}
+            />
+            <Stack.Screen name='Home' component={HomeScreen} />
+            <Stack.Screen name='Setting' component={SettingScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
       </SafeAreaView>
     </PaperProvider>
   );
