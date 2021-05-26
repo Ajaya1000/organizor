@@ -7,8 +7,15 @@
  * @flow strict-local
  */
 import 'react-native-gesture-handler';
-import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+} from 'react-native';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -18,6 +25,7 @@ import {
   SettingScreen,
   SignupScreen,
   SplashScreen,
+  CustomSideMenu,
 } from './screens';
 
 const Stack = createStackNavigator();
@@ -36,44 +44,83 @@ const AuthStack = () => (
     />
   </Stack.Navigator>
 );
-const styles = StyleSheet.create({
-  common: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  view1: {
-    left: 0,
-    top: 0,
-    backgroundColor: 'green',
-  },
-  view2: {
-    left: '85%',
-    top: '5%',
-    height: '90%',
-  },
-});
+
+const backgroundStyle = {
+  backgroundColor: 'red',
+  height: '100%',
+};
 
 const App = () => {
-  const backgroundStyle = {
-    backgroundColor: 'white',
-    height: '100%',
-  };
+  const AnimatedValue = useRef(new Animated.Value(0)).current;
+  const [isSideMenuOpen, setSideMenuOpen] = useState(false);
 
   const navigationRef = React.createRef();
+
+  /**
+   *
+   * @param {string} name
+   * @param {object} params
+   * @returns {void}
+   *
+   * utility function navigate to a different screen
+   */
   const navigate = (name, params) =>
     navigationRef.current && navigationRef.current.navigate(name, params);
+
+  /**
+   *
+   * @param {int} val val can only be 0 & 1.
+   *                  0 being close & 1 is open
+   */
+  const toggleSideMenu = val => {
+    setSideMenuOpen(!isSideMenuOpen);
+    Animated.spring(AnimatedValue, {
+      toValue: val,
+      friction: 5,
+      useNativeDriver: false,
+    }).start();
+  };
 
   return (
     <PaperProvider>
       <StatusBar hidden />
       <SafeAreaView style={backgroundStyle}>
-        <View style={[styles.common, styles.view1]}>
-          <Text>Green</Text>
-        </View>
-        <View style={[styles.common, styles.view2]}>
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName='Splash'>
+        <CustomSideMenu
+          navigate={navigate}
+          toggleSideMenu={toggleSideMenu}
+          navigationRef={navigationRef}
+        />
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            },
+            {
+              left: AnimatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '75%'],
+              }),
+              top: AnimatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '7%'],
+              }),
+              height: AnimatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['100%', '86%'],
+              }),
+              borderRadius: AnimatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 50],
+              }),
+            },
+            {
+              overflow: 'hidden',
+            },
+          ]}>
+          <NavigationContainer ref={navigationRef}>
+            <Stack.Navigator initialRouteName='Home'>
               <Stack.Screen
                 options={{headerShown: false}}
                 name='Splash'
@@ -84,11 +131,27 @@ const App = () => {
                 name='Auth'
                 component={AuthStack}
               />
-              <Stack.Screen name='Home' component={HomeScreen} />
-              <Stack.Screen name='Setting' component={SettingScreen} />
+              <Stack.Screen options={{headerShown: false}} name='Home'>
+                {props => (
+                  <HomeScreen
+                    {...props}
+                    toggleSideMenu={toggleSideMenu}
+                    isSideMenuOpen={isSideMenuOpen}
+                  />
+                )}
+              </Stack.Screen>
+              <Stack.Screen options={{headerShown: false}} name='Setting'>
+                {props => (
+                  <SettingScreen
+                    {...props}
+                    toggleSideMenu={toggleSideMenu}
+                    isSideMenuOpen={isSideMenuOpen}
+                  />
+                )}
+              </Stack.Screen>
             </Stack.Navigator>
           </NavigationContainer>
-        </View>
+        </Animated.View>
       </SafeAreaView>
     </PaperProvider>
   );
